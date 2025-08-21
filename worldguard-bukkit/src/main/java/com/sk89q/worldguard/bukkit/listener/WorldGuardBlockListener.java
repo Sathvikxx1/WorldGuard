@@ -358,7 +358,7 @@ public class WorldGuardBlockListener extends AbstractListener {
     // @EventHandler(ignoreCancelled = true)
     public void onBlockPhysics(BlockPhysicsEvent event) {
         WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
-        if(wcfg.isEventDisabled(event.getEventName())) return;
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         ConfigurationManager cfg = getConfig();
 
         if (cfg.activityHaltToggle) {
@@ -399,7 +399,7 @@ public class WorldGuardBlockListener extends AbstractListener {
         Block target = event.getBlock();
         World world = target.getWorld();
         WorldConfiguration wcfg = getWorldConfig(world);
-        if(wcfg.isEventDisabled(event.getEventName())) return;
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
 
         if (wcfg.simulateSponge && target.getType() == Material.SPONGE) {
@@ -423,7 +423,7 @@ public class WorldGuardBlockListener extends AbstractListener {
         Block blockTo = event.getBlock();
         World world = blockTo.getWorld();
         WorldConfiguration wcfg = getWorldConfig(world);
-        if(wcfg.isEventDisabled(event.getEventName())) return;
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
 
         if (wcfg.simulateSponge && wcfg.redstoneSponges) {

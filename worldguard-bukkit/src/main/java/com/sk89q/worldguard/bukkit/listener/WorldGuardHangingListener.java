@@ -56,7 +56,7 @@ public class WorldGuardHangingListener extends AbstractListener {
         Hanging hanging = event.getEntity();
         World world = hanging.getWorld();
         WorldConfiguration wcfg = getWorldConfig(world);
-        if(wcfg.isEventDisabled(event.getEventName())) return;
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         if (event instanceof HangingBreakByEntityEvent) {
             HangingBreakByEntityEvent entityEvent = (HangingBreakByEntityEvent) event;

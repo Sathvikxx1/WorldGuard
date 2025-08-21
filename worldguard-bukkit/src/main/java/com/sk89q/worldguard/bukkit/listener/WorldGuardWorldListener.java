@@ -44,7 +44,7 @@ public class WorldGuardWorldListener extends AbstractListener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         ConfigurationManager cfg = getConfig();
 
         if (cfg.activityHaltToggle) {
@@ -65,7 +65,7 @@ public class WorldGuardWorldListener extends AbstractListener {
 
     @EventHandler
     public void onWorldLoad(WorldLoadEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         initWorld(event.getWorld());
     }
 

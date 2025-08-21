@@ -131,16 +131,15 @@ public class RegionProtectionListener extends AbstractListener {
      * Return whether the given cause is whitelist (should be ignored).
      *
      * @param cause the cause
-     * @param world the world
+     * @param config the world configuration
      * @param pvp whether the event in question is PvP combat
      * @return true if whitelisted
      */
-    private boolean isWhitelisted(Cause cause, World world, boolean pvp) {
+    private boolean isWhitelisted(Cause cause, WorldConfiguration config, boolean pvp) {
         Object rootCause = cause.getRootCause();
 
         if (rootCause instanceof Player) {
             Player player = (Player) rootCause;
-            WorldConfiguration config = getWorldConfig(world);
 
             if (config.fakePlayerBuildOverride && InteropUtils.isFakePlayer(player)) {
                 return true;
@@ -155,10 +154,11 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlaceBlock(final PlaceBlockEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
-        if (isWhitelisted(event.getCause(), event.getWorld(), false)) return; // Whitelisted cause
+        if (isWhitelisted(event.getCause(), wcfg, false)) return; // Whitelisted cause
 
         final Material type = event.getEffectiveMaterial();
         final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
@@ -167,7 +167,7 @@ public class RegionProtectionListener extends AbstractListener {
         // Don't check liquid flow unless it's enabled
         if (event.getCause().getRootCause() instanceof Block
                 && Materials.isLiquid(type)
-                && !getWorldConfig(event.getWorld()).checkLiquidFlow) {
+                && !wcfg.checkLiquidFlow) {
             return;
         }
 
@@ -192,7 +192,7 @@ public class RegionProtectionListener extends AbstractListener {
                 event.setSilent(true); // gets spammy
                 canPlace = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_PLACE, Flags.FROSTED_ICE_FORM));
                 what = "use frostwalker"; // hidden anyway
-            /* Everything else */
+                /* Everything else */
             } else {
                 canPlace = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_PLACE));
                 what = "place that block";
@@ -209,10 +209,11 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBreakBlock(final BreakBlockEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
-        if (isWhitelisted(event.getCause(), event.getWorld(), false)) return; // Whitelisted cause
+        if (isWhitelisted(event.getCause(), wcfg, false)) return; // Whitelisted cause
 
         final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
@@ -228,7 +229,7 @@ public class RegionProtectionListener extends AbstractListener {
                     canBreak = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_BREAK, Flags.TNT));
                     what = "use dynamite";
 
-                /* Everything else */
+                    /* Everything else */
                 } else {
                     canBreak = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_BREAK));
                     what = "break that block";
@@ -246,10 +247,11 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onUseBlock(final UseBlockEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
-        if (isWhitelisted(event.getCause(), event.getWorld(), false)) return; // Whitelisted cause
+        if (isWhitelisted(event.getCause(), wcfg, false)) return; // Whitelisted cause
 
         final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
         final RegionAssociable associable = createRegionAssociable(event.getCause());
@@ -264,42 +266,42 @@ public class RegionProtectionListener extends AbstractListener {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event));
                 what = "use that";
 
-            /* Inventory */
+                /* Inventory */
             } else if (Materials.isInventoryBlock(type)) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.CHEST_ACCESS));
                 what = "open that";
 
-            /* Inventory for blocks with the possibility to be only use, e.g. lectern */
+                /* Inventory for blocks with the possibility to be only use, e.g. lectern */
             } else if (handleAsInventoryUsage(event.getOriginalEvent())) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.CHEST_ACCESS));
                 what = "take that";
 
-            /* Anvils */
+                /* Anvils */
             } else if (Materials.isAnvil(type)) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.USE_ANVIL));
                 what = "use that";
 
-            /* Beds */
+                /* Beds */
             } else if (Materials.isBed(type)) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.INTERACT, Flags.SLEEP));
                 what = "sleep";
 
-            /* Respawn Anchors */
-            } else if(type == Material.RESPAWN_ANCHOR) {
+                /* Respawn Anchors */
+            } else if (type == Material.RESPAWN_ANCHOR) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.INTERACT, Flags.RESPAWN_ANCHORS));
                 what = "use anchors";
 
-            /* TNT */
+                /* TNT */
             } else if (type == Material.TNT) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.INTERACT, Flags.TNT));
                 what = "use explosives";
 
-            /* Legacy USE flag */
+                /* Legacy USE flag */
             } else if (Materials.isUseFlagApplicable(type)) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.INTERACT, Flags.USE));
                 what = "use that";
 
-            /* Everything else */
+                /* Everything else */
             } else {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.INTERACT));
                 what = "use that";
@@ -316,10 +318,11 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onSpawnEntity(SpawnEntityEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
-        if (isWhitelisted(event.getCause(), event.getWorld(), false)) return; // Whitelisted cause
+        if (isWhitelisted(event.getCause(), wcfg, false)) return; // Whitelisted cause
 
         Location target = event.getTarget();
         EntityType type = event.getEffectiveType();
@@ -335,12 +338,12 @@ public class RegionProtectionListener extends AbstractListener {
             canSpawn = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.PLACE_VEHICLE));
             what = "place vehicles";
 
-        /* Item pickup */
+            /* Item pickup */
         } else if (event.getEntity() instanceof Item) {
             canSpawn = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.ITEM_DROP));
             what = "drop items";
 
-        /* XP drops */
+            /* XP drops */
         } else if (type == EntityType.EXPERIENCE_ORB) {
             canSpawn = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.EXP_DROPS));
             what = "drop XP";
@@ -349,7 +352,7 @@ public class RegionProtectionListener extends AbstractListener {
             canSpawn = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.POTION_SPLASH));
             what = "use lingering potions";
 
-        /* Everything else */
+            /* Everything else */
         } else {
             canSpawn = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event));
             what = "place things";
@@ -363,10 +366,11 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDestroyEntity(DestroyEntityEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
-        if (isWhitelisted(event.getCause(), event.getWorld(), false)) return; // Whitelisted cause
+        if (isWhitelisted(event.getCause(), wcfg, false)) return; // Whitelisted cause
 
         Location target = event.getTarget();
         EntityType type = event.getEntity().getType();
@@ -381,12 +385,12 @@ public class RegionProtectionListener extends AbstractListener {
             canDestroy = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.DESTROY_VEHICLE));
             what = "break vehicles";
 
-        /* Item pickup */
+            /* Item pickup */
         } else if (event.getEntity() instanceof Item || event.getEntity() instanceof ExperienceOrb) {
             canDestroy = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.ITEM_PICKUP));
             what = "pick up items";
 
-        /* Everything else */
+            /* Everything else */
         } else {
             canDestroy = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event));
             what = "break things";
@@ -400,10 +404,11 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onUseEntity(UseEntityEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
-        if (isWhitelisted(event.getCause(), event.getWorld(), false)) return; // Whitelisted cause
+        if (isWhitelisted(event.getCause(), wcfg, false)) return; // Whitelisted cause
 
         Location target = event.getTarget();
         RegionAssociable associable = createRegionAssociable(event.getCause());
@@ -419,7 +424,7 @@ public class RegionProtectionListener extends AbstractListener {
                 || Entities.isNPC(entity) || entity instanceof Player) {
             canUse = event.getRelevantFlags().isEmpty() || query.queryState(BukkitAdapter.adapt(target), associable, combine(event)) != State.DENY;
             what = "use that";
-        /* Paintings, item frames, etc. */
+            /* Paintings, item frames, etc. */
         } else if (Entities.isConsideredBuildingIfUsed(entity)
                 // weird case since sneak+interact is chest access and not ride
                 || event.getOriginalEvent() instanceof InventoryOpenEvent) {
@@ -435,7 +440,7 @@ public class RegionProtectionListener extends AbstractListener {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event));
                 what = "change that";
             }
-        /* Ridden on use */
+            /* Ridden on use */
         } else if (Entities.isRiddenOnUse(entity)) {
             if (event.getOriginalEvent() instanceof PlayerLeashEntityEvent) {
                 canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event));
@@ -446,7 +451,7 @@ public class RegionProtectionListener extends AbstractListener {
                 canUse = true;
                 what = "ride that";
             }
-        /* Everything else */
+            /* Everything else */
         } else {
             canUse = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.INTERACT));
             what = "use that";
@@ -460,7 +465,8 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDamageEntity(DamageEntityEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
         if (event.getResult() == Result.ALLOW) return; // Don't care about events that have been pre-allowed
         if (!isRegionSupportEnabled(event.getWorld())) return; // Region support disabled
         // Whitelist check is below
@@ -477,7 +483,7 @@ public class RegionProtectionListener extends AbstractListener {
         // because (1) this is a frequent source of confusion and
         // (2) some users want to block PvP even with the bypass permission
         boolean pvp = event.getEntity() instanceof Player && playerAttacker != null && !playerAttacker.equals(event.getEntity());
-        if (isWhitelisted(event.getCause(), event.getWorld(), pvp)) {
+        if (isWhitelisted(event.getCause(), wcfg, pvp)) {
             return;
         }
 
@@ -488,12 +494,12 @@ public class RegionProtectionListener extends AbstractListener {
         } else if (Entities.isVehicle(event.getEntity().getType())) {
             canDamage = query.testBuild(target, associable, combine(event, Flags.DESTROY_VEHICLE));
             what = "change that";
-        /* Paintings, item frames, etc. */
+            /* Paintings, item frames, etc. */
         } else if (Entities.isConsideredBuildingIfUsed(event.getEntity())) {
             canDamage = query.testBuild(target, associable, combine(event));
             what = "change that";
 
-        /* PVP */
+            /* PVP */
         } else if (pvp) {
             LocalPlayer localAttacker = WorldGuardPlugin.inst().wrapPlayer(playerAttacker);
             Player defender = (Player) event.getEntity();
@@ -514,17 +520,17 @@ public class RegionProtectionListener extends AbstractListener {
 
             what = "PvP";
 
-        /* Player damage not caused  by another player */
+            /* Player damage not caused  by another player */
         } else if (event.getEntity() instanceof Player) {
             canDamage = event.getRelevantFlags().isEmpty() || query.queryState(target, associable, combine(event)) != State.DENY;
             what = "damage that";
 
-        /* damage to non-hostile mobs (e.g. animals) */
+            /* damage to non-hostile mobs (e.g. animals) */
         } else if (Entities.isNonHostile(event.getEntity())) {
             canDamage = query.testBuild(target, associable, combine(event, Flags.DAMAGE_ANIMALS));
             what = "harm that";
 
-        /* Everything else */
+            /* Everything else */
         } else {
             canDamage = query.testBuild(target, associable, combine(event, Flags.INTERACT));
             what = "hit that";
@@ -538,14 +544,17 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler
     public void onEntityMount(EntityMountEvent event) {
-        if(getWorldConfig(event.getEntity().getWorld()).isEventDisabled(event.getEventName())) return;
+        World world = event.getEntity().getWorld();
+        WorldConfiguration wcfg = getWorldConfig(world);
+        if (wcfg.isEventDisabled(event.getEventName())) return;
+
         Entity vehicle = event.getMount();
         if (!isRegionSupportEnabled(vehicle.getWorld())) return; // Region support disabled
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
         Cause cause = Cause.create(player);
-        if (isWhitelisted(cause, vehicle.getWorld(), false)) {
+        if (isWhitelisted(cause, wcfg, false)) {
             return;
         }
         RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
@@ -560,14 +569,17 @@ public class RegionProtectionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onVehicleExit(VehicleExitEvent event) {
-        if(getWorldConfig(event.getVehicle().getWorld()).isEventDisabled(event.getEventName())) return;
+        World world = event.getVehicle().getWorld();
+        WorldConfiguration wcfg = getWorldConfig(world);
+        if (wcfg.isEventDisabled(event.getEventName())) return;
+
         Entity vehicle = event.getVehicle();
         if (!isRegionSupportEnabled(vehicle.getWorld())) return; // Region support disabled
         Entity exited = event.getExited();
 
         if (vehicle instanceof Tameable && exited instanceof Player player && !Entities.isNPC(player)) {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-            if (!isWhitelisted(Cause.create(player), vehicle.getWorld(), false)) {
+            if (!isWhitelisted(Cause.create(player), wcfg, false)) {
                 RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
                 Location location = vehicle.getLocation();
                 if (!query.testBuild(BukkitAdapter.adapt(location), localPlayer, Flags.RIDE, Flags.INTERACT)) {
