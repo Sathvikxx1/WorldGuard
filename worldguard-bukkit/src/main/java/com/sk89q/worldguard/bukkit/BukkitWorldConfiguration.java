@@ -293,7 +293,7 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
 //        disabledEvents = new HashSet<>(getStringList("events.disabled", null).stream().toList());
         worldEventChecker =
                 new WorldEventChecker(
-                        new HashSet<>(getStringList("events.disabled", null)), getBoolean("events.whitelist-mode", false));
+                        Set.copyOf(getStringList("events.disabled", null)), getBoolean("events.whitelist-mode", false));
 
         useRegions = getBoolean("regions.enable", true);
         regionInvinciblityRemovesMobs = getBoolean("regions.invincibility-removes-mobs", false);

@@ -80,8 +80,8 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBreakBlock(final BreakBlockEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         final WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         // Blacklist guard
         if (wcfg.getBlacklist() == null) {
@@ -111,8 +111,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlaceBlock(final PlaceBlockEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         final WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         // Blacklist guard
         if (wcfg.getBlacklist() == null) {
@@ -131,8 +132,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onUseBlock(final UseBlockEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         final WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         // Blacklist guard
         if (wcfg.getBlacklist() == null) {
@@ -151,8 +153,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onSpawnEntity(SpawnEntityEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         final WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         // Blacklist guard
         if (wcfg.getBlacklist() == null) {
@@ -176,8 +179,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDestroyEntity(DestroyEntityEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         final WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         // Blacklist guard
         if (wcfg.getBlacklist() == null) {
@@ -213,8 +217,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onUseItem(UseItemEvent event) {
-        if(getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWorld()).isEventDisabled(event.getEventName())) return;
         final WorldConfiguration wcfg = getWorldConfig(event.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         // Blacklist guard
         if (wcfg.getBlacklist() == null) {
@@ -242,8 +247,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        if(getWorldConfig(event.getItemDrop().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getItemDrop().getWorld()).isEventDisabled(event.getEventName())) return;
         WorldConfiguration wcfg = getWorldConfig(event.getPlayer().getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         if (wcfg.getBlacklist() != null) {
             Item ci = event.getItemDrop();
@@ -258,8 +264,9 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockDispense(BlockDispenseEvent event) {
-        if(getWorldConfig(event.getBlock().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getBlock().getWorld()).isEventDisabled(event.getEventName())) return;
         BukkitWorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
         if (wcfg.getBlacklist() != null) {
             if (!wcfg.getBlacklist().check(new BlockDispenseBlacklistEvent(null, BukkitAdapter.asBlockVector(event.getBlock().getLocation()),
@@ -271,15 +278,18 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if(getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return;
         HumanEntity entity = event.getWhoClicked();
         if (!(entity instanceof Player)) return;
+
+        Player player = (Player) entity;
+        WorldConfiguration wcfg = getWorldConfig(player.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
+
         Inventory inventory = event.getInventory();
         ItemStack item = event.getCurrentItem();
 
         if (item != null && inventory.getHolder() != null) {
-            Player player = (Player) entity;
-            WorldConfiguration wcfg = getWorldConfig(player.getWorld());
             LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
 
             if (wcfg.getBlacklist() != null && !wcfg.getBlacklist().check(
@@ -304,15 +314,17 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if(getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return;
         HumanEntity entity = event.getWhoClicked();
         if (!(entity instanceof Player)) return;
         if (event.getInventory().getType() != InventoryType.PLAYER
                 && event.getInventory().getType() != InventoryType.CRAFTING) return;
+
+        Player player = (Player) entity;
+        WorldConfiguration wcfg = getWorldConfig(player.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
+
         if (event.getRawSlots().stream().anyMatch(i -> i >= 5 && i <= 8)) { // dropped on armor slots
-            Player player = (Player) entity;
-            ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-            WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(entity.getWorld()));
             LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
             if (wcfg.getBlacklist() != null && !wcfg.getBlacklist().check(new ItemEquipBlacklistEvent(localPlayer,
                     BukkitAdapter.asBlockVector(player.getLocation()), createTarget(event.getOldCursor())), false, false)) {
@@ -321,8 +333,10 @@ public class BlacklistListener extends AbstractListener {
         }
     }
 
+
+
     private ItemStack checkEquipped(InventoryClickEvent event) {
-        if(getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return null;
+        if (getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return null;
         final Inventory clickedInventory = event.getClickedInventory();
         if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
             switch (event.getAction()) {
@@ -344,7 +358,7 @@ public class BlacklistListener extends AbstractListener {
             }
         } else if (clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER
                 && (event.getView().getTopInventory().getType() == InventoryType.PLAYER
-                    || event.getView().getTopInventory().getType() == InventoryType.CRAFTING)
+                || event.getView().getTopInventory().getType() == InventoryType.CRAFTING)
                 && event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             return event.getCurrentItem();
         }
@@ -353,31 +367,36 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryCreative(InventoryCreativeEvent event) {
-        if(getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getWhoClicked().getWorld()).isEventDisabled(event.getEventName())) return;
         HumanEntity entity = event.getWhoClicked();
+        if (!(entity instanceof Player)) return;
+
         ItemStack item = event.getCursor();
+        if (item.getType() == Material.AIR) return;
 
-        if (item.getType() != Material.AIR && entity instanceof Player) {
-            Player player = (Player) entity;
-            WorldConfiguration wcfg = getWorldConfig(player.getWorld());
-            LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
+        Player player = (Player) entity;
+        WorldConfiguration wcfg = getWorldConfig(player.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
 
-            if (wcfg.getBlacklist() != null && !wcfg.getBlacklist().check(
-                    new ItemAcquireBlacklistEvent(localPlayer, BukkitAdapter.asBlockVector(entity.getLocation()), createTarget(item)), false, false)) {
-                event.setCancelled(true);
-            }
+        LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
+
+        if (wcfg.getBlacklist() != null && !wcfg.getBlacklist().check(
+                new ItemAcquireBlacklistEvent(localPlayer, BukkitAdapter.asBlockVector(entity.getLocation()), createTarget(item)), false, false)) {
+            event.setCancelled(true);
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerItemHeld(PlayerItemHeldEvent event) {
-        if(getWorldConfig(event.getPlayer().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getPlayer().getWorld()).isEventDisabled(event.getEventName())) return;
         Player player = event.getPlayer();
+        WorldConfiguration wcfg = getWorldConfig(player.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
+
         Inventory inventory = player.getInventory();
         ItemStack item = inventory.getItem(event.getNewSlot());
 
         if (item != null) {
-            WorldConfiguration wcfg = getWorldConfig(player.getWorld());
             LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
 
             if (wcfg.getBlacklist() != null && !wcfg.getBlacklist().check(
@@ -389,12 +408,13 @@ public class BlacklistListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockDispenseArmor(BlockDispenseArmorEvent event) {
-        if(getWorldConfig(event.getBlock().getWorld()).isEventDisabled(event.getEventName())) return;
+        if (getWorldConfig(event.getBlock().getWorld()).isEventDisabled(event.getEventName())) return;
         if (!(event.getTargetEntity() instanceof Player)) return;
         Player player = ((Player) event.getTargetEntity());
-        ItemStack stack = event.getItem();
-
         WorldConfiguration wcfg = getWorldConfig(player.getWorld());
+        if (wcfg.isEventDisabled(event.getEventName())) return;
+
+        ItemStack stack = event.getItem();
         LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
         if (wcfg.getBlacklist() != null && !wcfg.getBlacklist().check(
                 new ItemEquipBlacklistEvent(localPlayer, BukkitAdapter.asBlockVector(player.getLocation()), createTarget(stack)), false, true)) {

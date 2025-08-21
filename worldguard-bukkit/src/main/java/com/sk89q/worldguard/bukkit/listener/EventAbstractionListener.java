@@ -1051,7 +1051,6 @@ public class EventAbstractionListener extends AbstractListener {
 
   //  @EventHandler(ignoreCancelled = true)
     public void onInventoryMoveItem(InventoryMoveItemEvent event) {
-        if(getWorldConfig(event.getDestination().getLocation().getWorld()).isEventDisabled(event.getEventName())) return;
         InventoryHolder causeHolder = PaperLib.getHolder(event.getInitiator(), false).getHolder();
 
         WorldConfiguration wcfg = null;
@@ -1062,6 +1061,8 @@ public class EventAbstractionListener extends AbstractListener {
                 && (wcfg = getWorldConfig((((HopperMinecart) causeHolder).getEntity().getWorld()))).ignoreHopperMoveEvents) {
             return;
         }
+
+        if(wcfg != null && wcfg.isEventDisabled(event.getEventName())) return;
 
         Entry entry;
 
