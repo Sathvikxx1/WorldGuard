@@ -808,10 +808,8 @@ public class WorldGuardEntityListener extends AbstractListener {
         if (event.getFoodLevel() > ent.getFoodLevel()) return;
 
         LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(bukkitPlayer);
-        WorldConfiguration wcfg = getWorldConfig(ent.getWorld());
-        if (wcfg.isEventDisabled(event.getEventName())) return;
 
-        if (wcfg.useRegions
+        if (getWorldConfig(ent.getWorld()).useRegions
                 && !WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery().testState(
                         player.getLocation(), player, Flags.HUNGER_DRAIN)) {
             event.setCancelled(true);

@@ -60,8 +60,7 @@ public class InvincibilityListener extends AbstractListener {
     public void onEntityDamage(EntityDamageEvent event) {
         Entity victim = event.getEntity();
         if (Entities.isNPC(victim)) return;
-        WorldConfiguration wcfg = getWorldConfig(event.getEntity().getWorld());
-        if (wcfg.isEventDisabled(event.getEventName())) return;
+
 
         if (victim instanceof Player player) {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
@@ -78,7 +77,7 @@ public class InvincibilityListener extends AbstractListener {
                         attacker = (Entity) ((Projectile) attacker).getShooter();
                     }
 
-                    if (wcfg.regionInvinciblityRemovesMobs
+                    if (getWorldConfig(event.getEntity().getWorld()).regionInvinciblityRemovesMobs
                             && attacker instanceof LivingEntity && !(attacker instanceof Player)
                             && !(attacker instanceof Tameable && ((Tameable) attacker).isTamed())) {
                         attacker.remove();
@@ -92,7 +91,6 @@ public class InvincibilityListener extends AbstractListener {
     public void onEntityCombust(EntityCombustEvent event) {
         Entity entity = event.getEntity();
         if (Entities.isNPC(entity)) return;
-        if (getWorldConfig(event.getEntity().getWorld()).isEventDisabled(event.getEventName())) return;
 
         if (entity instanceof Player player) {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
@@ -106,7 +104,6 @@ public class InvincibilityListener extends AbstractListener {
     @EventHandler(ignoreCancelled = true)
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         if (Entities.isNPC(event.getEntity())) return;
-        if (getWorldConfig(event.getEntity().getWorld()).isEventDisabled(event.getEventName())) return;
 
         if (event.getEntity() instanceof Player player) {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
