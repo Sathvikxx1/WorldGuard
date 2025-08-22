@@ -2,17 +2,18 @@
     <img src="worldguard-logo.svg" alt="WorldGuard" width="400" /> 
 </h1>
 
-Fork of FreshSMP's async-move WG fork with per-world Event Whitelisting.
-Usage example in `WorldGuard/worlds/world/config.yml`
+Implements per-world event whitelisting as seen in
+the `config.yml`. Check it out for more information!
 
+How to deactivate unused events:
 ```yml
 events:
     whitelist-mode: false
     disabled: ["PlayerInteractEvent"]
 ```
-Toggle `whitelist-mode` to disable all events except those in `events.disabled`
 
-`"!EventName"` negation should work, but it hasn't been tested properly :P
+Functionally, you can toggle `whitelist-mode` to disable all events; except those in `events.disabled`.
+
 
 Compiling
 ---------
