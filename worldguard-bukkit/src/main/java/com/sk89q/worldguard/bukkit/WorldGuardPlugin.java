@@ -186,7 +186,7 @@ public class WorldGuardPlugin extends JavaPlugin {
         (new EventAbstractionListener(this)).registerEvents();
         (new PlayerModesListener(this)).registerEvents();
         (new BuildPermissionListener(this)).registerEvents();
-        (new InvincibilityListener(this)).registerEvents();
+      //     (new InvincibilityListener(this)).registerEvents();
         if ("true".equalsIgnoreCase(System.getProperty("worldguard.debug.listener"))) {
             (new DebuggingListener(this, WorldGuard.logger)).registerEvents();
         }
